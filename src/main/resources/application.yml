@@ -1,0 +1,43 @@
+micronaut:
+  application:
+    name: oda-discord-service
+  security:
+    token:
+      bearer:
+        enabled: true
+      cookie:
+        enabled: true
+      jwt:
+        signatures:
+          jwks:
+            keycloak:
+              url: ${JWKS_URI}
+  metrics:
+    enabled: true
+    export:
+      prometheus:
+        enabled: true
+        step: PT1M
+  executors:
+    command-listener:
+      type: fixed
+      nThreads: 1
+  http:
+    services:
+      discord:
+        url: ${DISCORD_API_URL:`https://discord.com`}
+flyway:
+  datasources:
+    default:
+      enabled: true
+      baseline-on-migrate: true
+      schemas: 'discord'
+      default-schema: 'discord'
+endpoints:
+  prometheus:
+    sensitive: false
+  metrics:
+    sensitive: false
+datasources:
+  default:
+    schema: 'discord'
