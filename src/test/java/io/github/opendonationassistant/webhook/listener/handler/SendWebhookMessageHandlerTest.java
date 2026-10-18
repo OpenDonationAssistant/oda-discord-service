@@ -7,7 +7,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import io.github.opendonationassistant.integration.webhook.WebhookClient;
-import io.github.opendonationassistant.webhook.listener.handler.SendWebhookMessageHandler.SendWebhookMessageCommand;
+import io.github.opendonationassistant.webhook.listener.handler.SendWebhookMessageHandler.SendDiscordWebhookMessageCommand;
 import io.github.opendonationassistant.webhook.repository.Webhook;
 import io.github.opendonationassistant.webhook.repository.WebhookDataRepository;
 import io.micronaut.serde.ObjectMapper;
@@ -37,8 +37,8 @@ public class SendWebhookMessageHandlerTest {
     return new Webhook(id, "recipient-1", url, enabled);
   }
 
-  private static SendWebhookMessageCommand command() {
-    return new SendWebhookMessageCommand("recipient-1", "hello");
+  private static SendDiscordWebhookMessageCommand command() {
+    return new SendDiscordWebhookMessageCommand("recipient-1", "hello");
   }
 
   @Test
