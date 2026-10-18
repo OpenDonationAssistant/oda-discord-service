@@ -22,10 +22,7 @@ public class SendDiscordMessageHandler
   private final DiscordClient discord;
 
   @Inject
-  public SendDiscordMessageHandler(
-    ObjectMapper mapper,
-    DiscordClient discord
-  ) {
+  public SendDiscordMessageHandler(ObjectMapper mapper, DiscordClient discord) {
     super(mapper);
     this.discord = discord;
   }
