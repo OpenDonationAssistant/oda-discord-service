@@ -2,8 +2,9 @@ package io.github.opendonationassistant.integration.discord;
 
 import io.github.opendonationassistant.integration.discord.DiscordApi.DiscordMessageRequest;
 import io.github.opendonationassistant.integration.discord.DiscordApi.DiscordMessageResponse;
-import io.github.opendonationassistant.rabbit.TokenRPC;
+import io.github.opendonationassistant.rabbit.AsyncTokenRPC;
 import io.github.opendonationassistant.rabbit.TokenRPC.TokenRequest;
+import io.github.opendonationassistant.rabbit.TokenRPC.TokenResponse;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.Optional;
@@ -15,12 +16,12 @@ import org.zalando.problem.Problem;
 public class DiscordClient {
 
   private final DiscordApi api;
-  private final TokenRPC tokenRPC;
+  private final AsyncTokenRPC asyncTokenRpc;
 
   @Inject
-  public DiscordClient(DiscordApi api, TokenRPC tokenRPC) {
+  public DiscordClient(DiscordApi api, AsyncTokenRPC asyncTokenRpc) {
     this.api = api;
-    this.tokenRPC = tokenRPC;
+    this.asyncTokenRpc = asyncTokenRpc;
   }
 
   public CompletableFuture<DiscordMessageResponse> sendMessage(
@@ -40,21 +41,23 @@ public class DiscordClient {
     String refreshTokenId,
     Function<String, CompletableFuture<T>> fn
   ) {
-    return CompletableFuture.supplyAsync(() ->
-      tokenRPC.token(new TokenRequest(recipientId, refreshTokenId))
-    ).thenCompose(token -> {
-      if (token == null || token.token() == null) {
-        return CompletableFuture.failedFuture(
-          Problem.builder()
-            .withTitle("Unauthorized")
-            .withDetail(
-              Optional.ofNullable(token.message()).orElse("Unauthorized")
-            )
-            .build()
-        );
-      }
-      var authHeader = "Bearer %s".formatted(token.token());
-      return fn.apply(authHeader);
-    });
+    return asyncTokenRpc
+      .token(new TokenRequest(recipientId, refreshTokenId))
+      .thenCompose(token -> {
+        if (token == null || token.token() == null) {
+          return CompletableFuture.failedFuture(
+            Problem.builder()
+              .withTitle("Unauthorized")
+              .withDetail(
+                Optional.ofNullable(token)
+                  .map(TokenResponse::message)
+                  .orElse("Unauthorized")
+              )
+              .build()
+          );
+        }
+        var authHeader = "Bearer %s".formatted(token.token());
+        return fn.apply(authHeader);
+      });
   }
 }

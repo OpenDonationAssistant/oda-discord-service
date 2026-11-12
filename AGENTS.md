@@ -3,7 +3,7 @@
 **Generated:** 2026-09-18
 
 ## OVERVIEW
-Micronaut 5.1 / Java 25 microservice in the OpenDonationAssistant ecosystem. Consumes
+Micronaut / Java microservice in the OpenDonationAssistant ecosystem. Consumes
 `SendDiscordMessageCommand` from RabbitMQ and posts the message to a Discord channel.
 OAuth token is obtained from `oda-recipient-service` via RabbitMQ RPC. Ships as a
 GraalVM native image. Stateless: no tables, all data arrives in the command.
@@ -40,7 +40,7 @@ oda-discord-service/
 | `Application` | class + `@Factory` | root | Bootstrap, RabbitMQ wiring, pins `standalone` env |
 | `CommandListener` | `@RabbitListener` | discord/listener | Consumes `discord.command`, delegates to `MessageProcessor` |
 | `SendDiscordMessageHandler` | `@Singleton` | discord/listener/handler | Handles `SendDiscordMessageCommand` |
-| `DiscordClient` | `@Singleton` | integration/discord | Fetches token via `TokenRPC`, calls Discord |
+| `DiscordClient` | `@Singleton` | integration/discord | Fetches token via `AsyncTokenRPC`, calls Discord |
 | `DiscordApi` | `@Client("discord")` | integration/discord | `POST /api/v10/channels/{channelId}/messages` |
 
 ## CONVENTIONS
@@ -79,5 +79,5 @@ mvn clean package -Dpackaging=jar # JVM jar build
 - Known caveat: Discord's `Create Message` requires a bot token (`Authorization: Bot ...`).
   This service mirrors Twitch and sends `Bearer <token>` using the token held by
   `oda-recipient-service`, which currently stores user OAuth2 tokens.
-- Shared logic lives in `oda-rabbit-conf` (0.11.232): `AMQPConfiguration`, `MessageProcessor`,
+- Shared logic lives in `oda-rabbit-conf` : `AMQPConfiguration`, `MessageProcessor`,
   `AbstractMessageHandler`, `TokenRPC`.

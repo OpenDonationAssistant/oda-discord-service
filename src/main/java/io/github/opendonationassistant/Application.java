@@ -1,8 +1,11 @@
 package io.github.opendonationassistant;
 
+import io.github.opendonationassistant.commons.BlockingExecutor;
 import io.github.opendonationassistant.discord.listener.CommandListener;
 import io.github.opendonationassistant.rabbit.AMQPConfiguration;
+import io.github.opendonationassistant.rabbit.AsyncTokenRPC;
 import io.github.opendonationassistant.rabbit.Exchange;
+import io.github.opendonationassistant.rabbit.TokenRPC;
 import io.github.opendonationassistant.webhook.listener.EventsListener;
 import io.micronaut.context.ApplicationContextBuilder;
 import io.micronaut.context.ApplicationContextConfigurer;
@@ -60,5 +63,13 @@ public class Application {
     );
     bindings.addAll(EventsListener.BINDING);
     return new AMQPConfiguration(bindings);
+  }
+
+  @Singleton
+  public AsyncTokenRPC asyncTokenRpc(
+    TokenRPC tokenRPC,
+    BlockingExecutor blockingExecutor
+  ) {
+    return new AsyncTokenRPC(tokenRPC, blockingExecutor);
   }
 }
