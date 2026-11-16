@@ -1,5 +1,6 @@
 package io.github.opendonationassistant.integration.discord;
 
+import io.github.opendonationassistant.commons.problem.ApiProblem;
 import io.github.opendonationassistant.integration.discord.DiscordApi.DiscordMessageRequest;
 import io.github.opendonationassistant.integration.discord.DiscordApi.DiscordMessageResponse;
 import io.github.opendonationassistant.rabbit.AsyncTokenRPC;
@@ -10,7 +11,7 @@ import jakarta.inject.Singleton;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
-import org.zalando.problem.Problem;
+import org.zalando.problem.Status;
 
 @Singleton
 public class DiscordClient {
@@ -46,14 +47,14 @@ public class DiscordClient {
       .thenCompose(token -> {
         if (token == null || token.token() == null) {
           return CompletableFuture.failedFuture(
-            Problem.builder()
-              .withTitle("Unauthorized")
-              .withDetail(
-                Optional.ofNullable(token)
-                  .map(TokenResponse::message)
-                  .orElse("Unauthorized")
-              )
-              .build()
+            ApiProblem.of(
+              Status.UNAUTHORIZED,
+              "upstream_unauthorized",
+              "Unauthorized",
+              Optional.ofNullable(token)
+                .map(TokenResponse::message)
+                .orElse("Unauthorized")
+            )
           );
         }
         var authHeader = "Bearer %s".formatted(token.token());

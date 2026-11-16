@@ -16,11 +16,13 @@ import io.github.opendonationassistant.integration.discord.DiscordApi.DiscordMes
 import io.github.opendonationassistant.rabbit.AsyncTokenRPC;
 import io.github.opendonationassistant.rabbit.TokenRPC.TokenRequest;
 import io.github.opendonationassistant.rabbit.TokenRPC.TokenResponse;
+import java.net.URI;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.zalando.problem.Problem;
+import org.zalando.problem.Status;
 
 public class DiscordClientTest {
 
@@ -79,6 +81,9 @@ public class DiscordClientTest {
     var problem = assertInstanceOf(Problem.class, error.getCause());
     assertEquals("Unauthorized", problem.getTitle());
     assertEquals("no token", problem.getDetail());
+    assertEquals(Status.UNAUTHORIZED, problem.getStatus());
+    assertEquals("upstream_unauthorized", problem.getParameters().get("code"));
+    assertEquals(URI.create("/problems/upstream_unauthorized"), problem.getType());
     verifyNoInteractions(api);
   }
 
